@@ -105,6 +105,27 @@ def parse_teachers_with_counts(text: str) -> Tuple[List[str], Dict[str, int]]:
     return teachers, counts
 
 
+def determine_desired_counts(
+    teachers: Sequence[str],
+    per_teacher: int,
+    per_teacher_counts: Dict[str, int] | None = None,
+) -> Dict[str, int]:
+    """Return a mapping of teacher -> desired student count.
+
+    Negative or non-integer counts are coerced to zero.
+    """
+    desired: Dict[str, int] = {}
+    for t in teachers:
+        count = per_teacher
+        if per_teacher_counts and t in per_teacher_counts:
+            count = per_teacher_counts[t]
+        try:
+            desired[t] = max(0, int(count))
+        except (TypeError, ValueError):
+            desired[t] = 0
+    return desired
+
+
 def group_students(
     students: Sequence[str],
     teachers: Sequence[str],
@@ -127,13 +148,7 @@ def group_students(
 
     result: Dict[str, List[str]] = {t: [] for t in teachers_list}
 
-    # Determine desired counts per teacher
-    desired: Dict[str, int] = {}
-    for t in teachers_list:
-        if per_teacher_counts and t in per_teacher_counts:
-            desired[t] = max(0, int(per_teacher_counts[t]))
-        else:
-            desired[t] = max(0, int(per_teacher))
+    desired = determine_desired_counts(teachers_list, per_teacher, per_teacher_counts)
 
     total_needed = sum(desired.values())
     total_take = min(len(students_list), total_needed)

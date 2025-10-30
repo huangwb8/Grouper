@@ -12,6 +12,7 @@ from grouper.logic import (
     group_students,
     parse_names_block,
     parse_teachers_with_counts,
+    determine_desired_counts,
 )
 from grouper.styling import load_styles
 
@@ -398,6 +399,21 @@ def main() -> None:
                 return
             if not students:
                 QMessageBox.warning(self, "提示", "请录入学生名单。")
+                return
+
+            desired_counts = determine_desired_counts(teachers, per, counts)
+            total_needed = sum(desired_counts.values())
+            total_students = len(students)
+            if total_students != total_needed:
+                QMessageBox.warning(
+                    self,
+                    "人数有误",
+                    (
+                        f"学生总数为 {total_students} 人，"
+                        f"但老师分配人数合计为 {total_needed} 人。\n"
+                        "请检查老师人数设置或学生名单后再试。"
+                    ),
+                )
                 return
 
             groups = group_students(students, teachers, per, seed, counts)

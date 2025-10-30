@@ -113,7 +113,10 @@ def main() -> None:
     if welcome_image.exists():
         pm = QPixmap(str(welcome_image))
         if not pm.isNull():
-            splash = QSplashScreen(pm)
+            target_size = QSize(1280, 720)
+            scaled = pm.scaled(target_size, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+            splash = QSplashScreen(scaled)
+            splash.setFixedSize(target_size)
             splash.showMessage(
                 "开发者：黄伟斌\n版本：v20251030",
                 alignment=Qt.AlignBottom | Qt.AlignHCenter,
@@ -122,6 +125,23 @@ def main() -> None:
     else:
         QMessageBox.information(None, "欢迎", "开发者：黄伟斌\n版本：v20251030")
 
+    TEACHERS_SAMPLE = (
+        "# 这是一个示例\n"
+        "老师1:3\n"
+        "老师2:1\n"
+        "老师3:2"
+    )
+
+    STUDENTS_SAMPLE = (
+        "# 这是一个示例\n"
+        "学生1\n"
+        "学生2\n"
+        "学生3\n"
+        "学生4\n"
+        "学生5\n"
+        "学生6"
+    )
+
     class Main(QMainWindow):
         def __init__(self) -> None:
             super().__init__()
@@ -129,6 +149,11 @@ def main() -> None:
             self.resize(1280, 720)  # 16:9 default
 
             self.settings = Settings.load()
+            self._app = app
+            base_font = self._app.font()
+            initial_size = self.settings.font_size or base_font.pointSize() or 10
+            self._current_font_size = int(initial_size)
+            self._apply_font_size(self._current_font_size)
 
             # Central frosted panel
             central = QWidget()
@@ -137,6 +162,15 @@ def main() -> None:
             panel = QFrame(objectName="GlassPanel")
             panel_layout = QVBoxLayout(panel)
             panel_layout.setSpacing(10)
+
+            font_row = QHBoxLayout()
+            font_row.addWidget(QLabel("字体大小："))
+            btn_zoom_in = QPushButton("放大")
+            btn_zoom_out = QPushButton("缩小")
+            font_row.addWidget(btn_zoom_in)
+            font_row.addWidget(btn_zoom_out)
+            font_row.addStretch(1)
+            panel_layout.addLayout(font_row)
 
             # Seed label
             self.seed_val = compute_seed_from_timestamp()
@@ -160,14 +194,16 @@ def main() -> None:
                 "在此粘贴老师姓名，每行一个或用逗号分隔…\n"
                 "可在老师后写数量，如：张三:3、张三（3）、张三 x3；未写则采用默认。"
             )
-            self.teachers_edit.setText(self.settings.teachers_text or "")
+            teacher_text = self.settings.teachers_text or TEACHERS_SAMPLE
+            self.teachers_edit.setText(teacher_text)
             panel_layout.addWidget(QLabel("老师名单："))
             panel_layout.addWidget(self.teachers_edit)
 
             # Students
             self.students_edit = QTextEdit()
             self.students_edit.setPlaceholderText("在此粘贴学生姓名，每行一个或用逗号分隔…")
-            self.students_edit.setText(self.settings.students_text or "")
+            student_text = self.settings.students_text or STUDENTS_SAMPLE
+            self.students_edit.setText(student_text)
             panel_layout.addWidget(QLabel("学生名单："))
             panel_layout.addWidget(self.students_edit)
 
@@ -198,6 +234,8 @@ def main() -> None:
             btn_open.clicked.connect(self._open_dir)
             btn_browse.clicked.connect(self._browse_dir)
             self.btn_go.clicked.connect(self._run_grouping)
+            btn_zoom_in.clicked.connect(lambda: self._change_font_size(1))
+            btn_zoom_out.clicked.connect(lambda: self._change_font_size(-1))
 
             # Restore geometry
             if self.settings.geometry:
@@ -232,12 +270,26 @@ def main() -> None:
                 students_text=self.students_edit.toPlainText(),
                 teachers_text=self.teachers_edit.toPlainText(),
                 geometry=self.saveGeometry().hex(),
+                font_size=self._current_font_size,
             )
             try:
                 s.save()
             except Exception:
                 pass
             super().closeEvent(event)
+
+        def _change_font_size(self, delta: int) -> None:
+            self._apply_font_size(self._current_font_size + delta)
+
+        def _apply_font_size(self, size: int) -> None:
+            try:
+                size_int = max(8, min(32, int(size)))
+            except (TypeError, ValueError):
+                size_int = 10
+            font = self._app.font()
+            font.setPointSize(size_int)
+            self._app.setFont(font)
+            self._current_font_size = size_int
 
         def _run_grouping(self) -> None:
             # compute fresh seed based on timestamp

@@ -99,6 +99,7 @@ class Settings:
     students_text: str = ""
     teachers_text: str = ""
     geometry: Optional[str] = None  # Qt geometry serialized as hex string
+    font_size: int = 10
 
     @classmethod
     def load(cls) -> "Settings":

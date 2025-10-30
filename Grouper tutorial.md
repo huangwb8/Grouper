@@ -9,9 +9,33 @@ cd /mnt/e/PythonCloud/Package/Grouper
 
 # 开启codex
 codex
+
+# PowerShell里更新包（base环境）
+cd E:\PythonCloud\Package\Grouper
+# python -m venv .venv
+# pip install PySide6 openpyxl
+.venv\\bin\\activate
+x86_64\\build_windows.bat
 ```
 
 # 日志
+
++ 03
+
+```
+ - 默认示例: 在 src/grouper/app.py 给教师与学生输入框预填 o1 里提供的示例文本，帮助首次使用者快速上手。
+  - 字体调节: 新增“字体大小”行及“放大/缩小”按钮，配合 Settings.font_size 持久化，实时调整全局字体。
+  - 欢迎界面: 将欢迎界面缩放并固定为 1280×720，与主窗口尺寸一致，避免全屏覆盖。
+  - 打包脚本: 将 x86_64/build_windows.bat 改为使用 PyInstaller --onefile，生成无需 _internal 的独立 Grouper.exe。
+
+  后续建议
+
+  - 如需进一步减小文件体积，可在打包前移除未使用资源或启用 PyInstaller UPX 压缩。
+
+  测试
+
+  - 未运行: 当前环境未安装 pytest（执行时报 pytest: command not found）。如需验证，请先安装测试依赖后再运行 pytest -q。
+```
 
 + 02
 

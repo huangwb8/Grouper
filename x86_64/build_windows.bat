@@ -14,6 +14,7 @@ python -m pip install pyinstaller PySide6 openpyxl >NUL
 pyinstaller ^
   --noconfirm ^
   --clean ^
+  --onefile ^
   --name Grouper ^
   --windowed ^
   --paths src ^
@@ -23,5 +24,5 @@ pyinstaller ^
   %ENTRY%
 
 echo.
-echo Build complete. Find the EXE under dist\Grouper\Grouper.exe
+echo Build complete. Find the standalone EXE under dist\Grouper.exe
 endlocal

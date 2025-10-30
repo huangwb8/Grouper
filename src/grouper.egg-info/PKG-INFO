@@ -1,0 +1,52 @@
+Metadata-Version: 2.4
+Name: grouper
+Version: 2025.10.30
+Summary: Student-to-teacher random grouper with GUI
+Author: 黄伟斌
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: PySide6>=6.6
+Requires-Dist: openpyxl>=3.1
+
+# Repository Guidelines
+
+## Project Structure & Module Organization
+- Current files: `Grouper tutorial.md` (how-to notes) and `Prompt.txt` (prompt assets).
+- When adding code, use this layout:
+  - `src/grouper/` — core package modules (e.g., `src/grouper/grouping.py`).
+  - `tests/` — pytest tests mirroring module paths (e.g., `tests/test_grouping.py`).
+  - `examples/` — small runnable samples and notebooks.
+  - `pyproject.toml` — build and tooling config when introduced.
+
+## Build, Test, and Development Commands
+- Create env + install (editable):
+  - `python -m venv .venv && source .venv/bin/activate`
+  - `pip install -e .[dev]`
+- Run tests: `pytest -q`
+- Lint/format: `ruff check .` and `ruff format .` (or `black .` if Black is configured).
+- Type check: `mypy src` (when type hints are present).
+- Build package (when `pyproject.toml` exists): `python -m build`
+
+## Coding Style & Naming Conventions
+- Follow PEP 8; 4-space indentation; prefer max line length 88 (Black) or 100 if not using Black.
+- Naming: modules/functions `snake_case`, classes `PascalCase`, constants `UPPER_SNAKE_CASE`.
+- Imports: stdlib → third‑party → local; prefer absolute imports.
+- Docstrings: Google‑style; include args, returns, and examples for public APIs.
+
+## Testing Guidelines
+- Framework: `pytest`. Place tests in `tests/` with filenames `test_*.py` and function names `test_*`.
+- Mirror package paths; use fixtures and `tmp_path` for filesystem work.
+- Target coverage ≥80% for new/changed code. Run `pytest --maxfail=1 --disable-warnings -q`.
+
+## Commit & Pull Request Guidelines
+- Commits: short imperative subject (≤72 chars), meaningful body explaining why, reference issues (e.g., `Fixes #12`). Prefer small, logically scoped commits.
+- Conventional Commits are welcome (e.g., `feat: add group merge strategy`).
+- PRs: clear description, linked issues, before/after snippets or screenshots when behavior changes, and notes on testing. Ensure tests, lint, and type checks pass.
+
+## Security & Configuration Tips
+- Do not commit secrets. Use environment variables (e.g., `.env` + `os.getenv`) and add local files to `.gitignore`.
+- Keep dependencies minimal and pinned where appropriate; avoid network calls in tests.
+
+## Agent-Specific Instructions
+- Make focused changes aligned to the structure above; avoid broad refactors.
+- Prefer adding configuration only if used by the codebase; do not introduce new tools without need.

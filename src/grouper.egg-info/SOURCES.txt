@@ -1,0 +1,14 @@
+AGENTS.md
+pyproject.toml
+src/grouper/__init__.py
+src/grouper/app.py
+src/grouper/config.py
+src/grouper/logic.py
+src/grouper/styling.py
+src/grouper.egg-info/PKG-INFO
+src/grouper.egg-info/SOURCES.txt
+src/grouper.egg-info/dependency_links.txt
+src/grouper.egg-info/entry_points.txt
+src/grouper.egg-info/requires.txt
+src/grouper.egg-info/top_level.txt
+tests/test_logic.py

@@ -1,0 +1,2 @@
+[console_scripts]
+grouper = grouper.app:main

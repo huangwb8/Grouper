@@ -14,7 +14,6 @@ config.ini
 
 # poetry enviroments
 /poetry/.venv
-pyproject.toml
 poetry.lock
 .venv
 

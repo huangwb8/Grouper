@@ -23,6 +23,7 @@ def parse_names_block(text: str) -> List[str]:
 
     - Splits by newlines, commas, semicolons, tabs, and Chinese punctuation.
     - Trims whitespace, drops empty rows, and de-duplicates while preserving order.
+    - Lines starting with ``#`` are treated as comments and ignored.
     """
     if not text:
         return []
@@ -35,6 +36,8 @@ def parse_names_block(text: str) -> List[str]:
     for raw in text.splitlines():
         name = raw.strip()
         if not name:
+            continue
+        if name.startswith("#"):
             continue
         if name not in seen:
             seen.add(name)
@@ -55,6 +58,8 @@ def parse_teachers_with_counts(text: str) -> Tuple[List[str], Dict[str, int]]:
 
     Returns:
       (teachers, counts) where counts maps teacher name -> desired count.
+
+    Lines beginning with ``#`` are treated as comments and skipped.
     """
     if not text:
         return [], {}
@@ -74,6 +79,8 @@ def parse_teachers_with_counts(text: str) -> Tuple[List[str], Dict[str, int]]:
     for raw in text.splitlines():
         raw = raw.strip()
         if not raw:
+            continue
+        if raw.startswith("#"):
             continue
         m = pat.match(raw)
         if not m:

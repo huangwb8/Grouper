@@ -289,6 +289,9 @@ def main() -> None:
             font = self._app.font()
             font.setPointSize(size_int)
             self._app.setFont(font)
+            self.setFont(font)
+            for widget in self.findChildren(QWidget):
+                widget.setFont(font)
             self._current_font_size = size_int
 
         def _run_grouping(self) -> None:

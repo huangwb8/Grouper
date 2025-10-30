@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
-from grouper.config import Settings, ensure_runtime_dirs, ASSETS_DIR
+from grouper.config import Settings, ensure_runtime_dirs, ASSETS_DIR, APP_VERSION
 from grouper.logic import (
     compute_seed_from_timestamp,
     group_students,
@@ -93,6 +93,7 @@ def main() -> None:
     ensure_runtime_dirs()
 
     settings = Settings.load()
+    version_text = f"开发者：黄伟斌\n版本：{APP_VERSION}"
 
     def _coerce_welcome_font(value: int | str | None) -> int:
         try:
@@ -106,6 +107,10 @@ def main() -> None:
 
     app = QApplication(sys.argv)
     app.setApplicationName("Grouper")
+    try:
+        app.setApplicationVersion(APP_VERSION)
+    except Exception:
+        pass
 
     app_icon: QIcon | None = None
     logo_path = ASSETS_DIR / "logo.jpg"
@@ -151,12 +156,12 @@ def main() -> None:
             splash_font.setPointSize(splash_size)
             splash.setFont(splash_font)
             splash.showMessage(
-                "开发者：黄伟斌\n版本：v20251030",
+                version_text,
                 alignment=Qt.AlignBottom | Qt.AlignHCenter,
             )
             splash.show()
     else:
-        QMessageBox.information(None, "欢迎", "开发者：黄伟斌\n版本：v20251030")
+        QMessageBox.information(None, "欢迎", version_text)
 
     TEACHERS_SAMPLE = (
         "# 这是一个示例\n"

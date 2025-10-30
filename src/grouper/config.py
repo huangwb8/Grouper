@@ -29,6 +29,7 @@ def _detect_base_dir() -> Path:
 
 
 APP_DIR = _detect_base_dir()
+APP_VERSION = "v0.0.6"
 
 
 def _user_data_dir() -> Path:

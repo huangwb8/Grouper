@@ -23,7 +23,7 @@ def parse_names_block(text: str) -> List[str]:
 
     - Splits by newlines, commas, semicolons, tabs, and Chinese punctuation.
     - Trims whitespace, drops empty rows, and de-duplicates while preserving order.
-    - Lines starting with ``#`` are treated as comments and ignored.
+    - Any ``#`` comment marker and following text on a line is ignored.
     """
     if not text:
         return []
@@ -34,10 +34,9 @@ def parse_names_block(text: str) -> List[str]:
     names = []
     seen = set()
     for raw in text.splitlines():
-        name = raw.strip()
+        comment_stripped = raw.split("#", 1)[0]
+        name = comment_stripped.strip()
         if not name:
-            continue
-        if name.startswith("#"):
             continue
         if name not in seen:
             seen.add(name)
@@ -59,7 +58,7 @@ def parse_teachers_with_counts(text: str) -> Tuple[List[str], Dict[str, int]]:
     Returns:
       (teachers, counts) where counts maps teacher name -> desired count.
 
-    Lines beginning with ``#`` are treated as comments and skipped.
+    Any ``#`` comment marker and following text on a line is removed before parsing.
     """
     if not text:
         return [], {}
@@ -77,12 +76,10 @@ def parse_teachers_with_counts(text: str) -> Tuple[List[str], Dict[str, int]]:
     pat = re.compile(r"^\s*(?P<name>.+?)\s*(?:[:：=\(（xX×]?\s*(?P<num>\d+)\)?\s*)?$")
 
     for raw in text.splitlines():
-        raw = raw.strip()
-        if not raw:
+        stripped = raw.split("#", 1)[0].strip()
+        if not stripped:
             continue
-        if raw.startswith("#"):
-            continue
-        m = pat.match(raw)
+        m = pat.match(stripped)
         if not m:
             continue
         name = (m.group("name") or "").strip()

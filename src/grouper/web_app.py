@@ -27,7 +27,7 @@ from grouper.logic import (
 
 
 DEFAULT_TEACHERS_TEXT = (
-    "# 这是一个示例。比如，”老师1:3“代表老师1分配3个学生\n"
+    "# 这是一个示例\n"
     "老师1:3\n"
     "老师2:1\n"
     "老师3:2"

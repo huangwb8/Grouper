@@ -37,7 +37,7 @@ def _export_xlsx(output_path: Path, groups: Dict[str, List[str]], seed: int) -> 
     ws.title = "Groups"
     ws.append(["Teacher", "Students"])
     for teacher, students in groups.items():
-        ws.append([teacher, "\n".join(students)])
+        ws.append([teacher, ", ".join(students)])
 
     ws2 = wb.create_sheet("Summary")
     total_students = sum(len(v) for v in groups.values())
@@ -62,8 +62,17 @@ def main() -> None:
         pass
 
     # Lazy import Qt to avoid import costs during tooling
-    from PySide6.QtCore import Qt, QSize
-    from PySide6.QtGui import QGuiApplication, QPixmap, QFont, QFontDatabase
+    from PySide6.QtCore import Qt, QSize, QUrl
+    from PySide6.QtGui import (
+        QPixmap,
+        QFont,
+        QFontDatabase,
+        QIcon,
+        QPalette,
+        QBrush,
+        QDesktopServices,
+        QPainter,
+    )
     from PySide6.QtWidgets import (
         QApplication,
         QFileDialog,
@@ -85,6 +94,14 @@ def main() -> None:
 
     app = QApplication(sys.argv)
     app.setApplicationName("Grouper")
+
+    app_icon: QIcon | None = None
+    logo_path = ASSETS_DIR / "logo.jpg"
+    if logo_path.exists():
+        icon = QIcon(str(logo_path))
+        if not icon.isNull():
+            app.setWindowIcon(icon)
+            app_icon = icon
 
     # Prefer system fonts that have robust CJK glyph coverage to avoid garbled text
     try:
@@ -147,6 +164,8 @@ def main() -> None:
             super().__init__()
             self.setWindowTitle("Grouper 分组器")
             self.resize(1280, 720)  # 16:9 default
+            if app_icon is not None:
+                self.setWindowIcon(app_icon)
 
             self.settings = Settings.load()
             self._app = app
@@ -225,10 +244,18 @@ def main() -> None:
             layout.addWidget(panel)
             layout.addStretch(1)
             self.setCentralWidget(central)
+            self._central_widget = central
+
+            self._bg_pixmap: QPixmap | None = None
+            bg_path = ASSETS_DIR / "backgroud-picture.jpg"
+            if bg_path.exists():
+                bg_pm = QPixmap(str(bg_path))
+                if not bg_pm.isNull():
+                    self._bg_pixmap = bg_pm
 
             # Apply stylesheet and background
             app.setStyleSheet(load_styles())
-            self._apply_background()
+            self._update_background()
 
             # Signals
             btn_open.clicked.connect(self._open_dir)
@@ -244,15 +271,43 @@ def main() -> None:
                 except Exception:
                     pass
 
-        def _apply_background(self) -> None:
-            bg = ASSETS_DIR / "backgroud-picture.jpg"  # note: name per prompt
-            if bg.exists():
-                # Apply via stylesheet to QMainWindow
-                url = bg.as_posix()
-                self.setStyleSheet(
-                    self.styleSheet()
-                    + f"\nQMainWindow {{ background-image: url('{url}'); background-position: center; background-repeat: no-repeat; }}"
-                )
+        def _update_background(self) -> None:
+            if self._bg_pixmap is None:
+                return
+            size = self.size()
+            if size.width() <= 0 or size.height() <= 0:
+                return
+
+            scaled = self._bg_pixmap.scaled(
+                size,
+                Qt.KeepAspectRatio,
+                Qt.SmoothTransformation,
+            )
+            canvas = QPixmap(size)
+            canvas.fill(Qt.transparent)
+
+            painter = QPainter(canvas)
+            x = (size.width() - scaled.width()) // 2
+            y = (size.height() - scaled.height()) // 2
+            painter.drawPixmap(x, y, scaled)
+            painter.end()
+
+            brush = QBrush(canvas)
+            palette = self.palette()
+            palette.setBrush(QPalette.Window, brush)
+            self.setAutoFillBackground(True)
+            self.setPalette(palette)
+
+            central = getattr(self, "_central_widget", None)
+            if central is not None:
+                cpal = central.palette()
+                cpal.setBrush(QPalette.Window, brush)
+                central.setAutoFillBackground(True)
+                central.setPalette(cpal)
+
+        def resizeEvent(self, event):  # type: ignore[override]
+            super().resizeEvent(event)
+            self._update_background()
 
         def _open_dir(self) -> None:
             _try_open_directory(self.save_dir_edit.text().strip() or ".")
@@ -328,7 +383,15 @@ def main() -> None:
                 QMessageBox.critical(self, "导出失败", str(e))
                 return
 
-            QMessageBox.information(self, "分组完成！", f"已保存到：\n{out}")
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Information)
+            msg.setWindowTitle("分组完成！")
+            msg.setText(f"已保存到：\n{out}")
+            open_btn = msg.addButton("打开文件", QMessageBox.ActionRole)
+            msg.addButton("确定", QMessageBox.AcceptRole)
+            msg.exec()
+            if msg.clickedButton() == open_btn:
+                QDesktopServices.openUrl(QUrl.fromLocalFile(str(out)))
 
     win = Main()
     if splash is not None:

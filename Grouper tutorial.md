@@ -1,3 +1,8 @@
+# Windows环境配置
+
++ 安装[Releases · niXman/mingw-builds-binaries](https://github.com/niXman/mingw-builds-binaries/releases)
++ 将bin添加到环境目录。这个方案是为了在系统中安装 binutils（提供 strip.exe），再运行`x86_64\\build_windows.bat`脚本时可自动启用二进制瘦身。
+
 # CodeX
 
 ```shell
@@ -19,6 +24,22 @@ x86_64\\build_windows.bat
 ```
 
 # 日志
+
++ 04
+
+```
+完成情况
+
+  - 批处理修复: 调整 x86_64\build_windows.bat，移除 EnableDelayedExpansion 与 !VAR! 语法，改用常规 %VAR% 展开，避
+    免 !PYI_FLAGS! 等字面量导致 “Script file 不存在” 报错。
+  - 可选瘦身: 保留 strip.exe 检测逻辑，当工具缺失时仅输出提示而不会触发一连串“不被识别的命令”错误。
+  - 资源完整: 继续将 logo.jpg 等资源通过 --add-data 打包，确保修复后的脚本仍生成完整的独立可执行文件。
+
+  测试
+
+  - 未运行: 当前环境缺少 pytest（运行时报 pytest: command not found）；若需验证，请先安装测试依赖后执行 pytest
+    -q。
+```
 
 + 03
 

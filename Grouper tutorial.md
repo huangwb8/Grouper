@@ -17,9 +17,12 @@ codex
 
 # PowerShell里更新包（base环境）
 cd E:\PythonCloud\Package\Grouper
+# cd D:\\python_environment
 # python -m venv .venv
+# D:\\python_environment\\.venv\\Scripts\\activate
 # pip install PySide6 openpyxl
-.venv\\bin\\activate
+D:\\python_environment\\.venv\\Scripts\\activate
+cd E:\\PythonCloud\\Package\\Grouper
 x86_64\\build_windows.bat
 ```
 

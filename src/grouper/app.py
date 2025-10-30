@@ -92,6 +92,18 @@ def main() -> None:
 
     ensure_runtime_dirs()
 
+    settings = Settings.load()
+
+    def _coerce_welcome_font(value: int | str | None) -> int:
+        try:
+            if value in (None, ""):
+                size = 24
+            else:
+                size = int(value)
+        except (TypeError, ValueError):
+            size = 24
+        return max(12, min(72, size))
+
     app = QApplication(sys.argv)
     app.setApplicationName("Grouper")
 
@@ -134,6 +146,10 @@ def main() -> None:
             scaled = pm.scaled(target_size, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
             splash = QSplashScreen(scaled)
             splash.setFixedSize(target_size)
+            splash_size = _coerce_welcome_font(getattr(settings, "welcome_font_size", 24))
+            splash_font = QFont(app.font())
+            splash_font.setPointSize(splash_size)
+            splash.setFont(splash_font)
             splash.showMessage(
                 "开发者：黄伟斌\n版本：v20251030",
                 alignment=Qt.AlignBottom | Qt.AlignHCenter,
@@ -160,14 +176,14 @@ def main() -> None:
     )
 
     class Main(QMainWindow):
-        def __init__(self) -> None:
+        def __init__(self, settings: Settings) -> None:
             super().__init__()
             self.setWindowTitle("Grouper 分组器")
             self.resize(1280, 720)  # 16:9 default
             if app_icon is not None:
                 self.setWindowIcon(app_icon)
 
-            self.settings = Settings.load()
+            self.settings = settings
             self._app = app
             base_font = self._app.font()
             initial_size = self.settings.font_size or base_font.pointSize() or 10
@@ -190,6 +206,15 @@ def main() -> None:
             font_row.addWidget(btn_zoom_out)
             font_row.addStretch(1)
             panel_layout.addLayout(font_row)
+
+            welcome_row = QHBoxLayout()
+            welcome_row.addWidget(QLabel("欢迎界面字号："))
+            self.welcome_font_spin = QSpinBox()
+            self.welcome_font_spin.setRange(12, 72)
+            self.welcome_font_spin.setValue(_coerce_welcome_font(self.settings.welcome_font_size))
+            welcome_row.addWidget(self.welcome_font_spin)
+            welcome_row.addStretch(1)
+            panel_layout.addLayout(welcome_row)
 
             # Seed label
             self.seed_val = compute_seed_from_timestamp()
@@ -326,6 +351,7 @@ def main() -> None:
                 teachers_text=self.teachers_edit.toPlainText(),
                 geometry=self.saveGeometry().hex(),
                 font_size=self._current_font_size,
+                welcome_font_size=int(self.welcome_font_spin.value()),
             )
             try:
                 s.save()
@@ -393,7 +419,7 @@ def main() -> None:
             if msg.clickedButton() == open_btn:
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(out)))
 
-    win = Main()
+    win = Main(settings)
     if splash is not None:
         splash.finish(win)
     win.show()

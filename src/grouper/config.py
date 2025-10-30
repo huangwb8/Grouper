@@ -100,6 +100,7 @@ class Settings:
     teachers_text: str = ""
     geometry: Optional[str] = None  # Qt geometry serialized as hex string
     font_size: int = 10
+    welcome_font_size: int = 24
 
     @classmethod
     def load(cls) -> "Settings":

@@ -79,7 +79,7 @@ PAGE_TEMPLATE = """
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Grouper 分组器 (Web)</title>
+  <title>Grouper 分组器 - Bensz</title>
   <style>
     body {
       font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
@@ -191,7 +191,7 @@ PAGE_TEMPLATE = """
 </head>
 <body>
   <div class="panel">
-    <h1>Grouper 分组器（Docker / Web 版）</h1>
+    <h1>Grouper 分组器 by Bensz</h1>
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         {% for msg in messages %}

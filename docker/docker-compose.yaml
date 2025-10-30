@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  grouper-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../exports:/app/exports
+    environment:
+      GROUPER_SECRET_KEY: change-me
